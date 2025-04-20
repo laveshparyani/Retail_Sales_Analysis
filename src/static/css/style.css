@@ -1,0 +1,166 @@
+:root {
+    --primary-color: #2C3E50;
+    --secondary-color: #3498DB;
+    --accent-color: #E74C3C;
+    --background-color: #ECF0F1;
+    --text-color: #2C3E50;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: var(--background-color);
+    color: var(--text-color);
+    padding: 20px;
+}
+
+.dashboard-title {
+    color: #2c3e50;
+    margin: 20px 0;
+    text-align: center;
+    font-size: 2.5rem;
+}
+
+.card {
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    margin-bottom: 20px;
+    border-radius: 10px;
+    transition: transform 0.3s ease;
+    background-color: white;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+}
+
+.card-header {
+    background-color: var(--primary-color);
+    color: white;
+    padding: 15px;
+    border-radius: 10px 10px 0 0;
+}
+
+.metric-card {
+    background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%);
+    color: white;
+    border: none;
+    border-radius: 10px;
+    transition: transform 0.3s ease;
+    height: 100%;
+}
+
+.metric-card:hover {
+    transform: translateY(-5px);
+}
+
+.metric-label {
+    font-size: 1.2rem;
+    margin-top: 10px;
+    color: rgba(255, 255, 255, 0.9);
+}
+
+.metric-value {
+    font-size: 2rem;
+    font-weight: bold;
+    color: white;
+}
+
+.filter-section {
+    background-color: white;
+    border: none;
+    border-radius: 10px;
+    margin-bottom: 20px;
+    padding: 20px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    position: relative;
+    z-index: 1000;
+}
+
+.filter-section .card-header {
+    background-color: var(--primary-color);
+    color: white;
+    border-radius: 10px 10px 0 0;
+    padding: 15px 20px;
+}
+
+.filter-section .card-body {
+    padding: 20px;
+}
+
+/* Date Range Picker Styles */
+.DateRangePickerInput {
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    padding: 5px;
+    width: 100%;
+}
+
+.DateInput {
+    width: 45%;
+}
+
+.DateInput_input {
+    padding: 5px 10px;
+    font-size: 14px;
+}
+
+/* Calendar Popup Styles */
+.DateRangePicker_picker {
+    z-index: 1001 !important;
+    position: absolute !important;
+}
+
+/* Dropdown Styles */
+.Select-control {
+    border: 1px solid #ddd;
+    border-radius: 5px;
+}
+
+/* Ensure dropdown menu appears above other elements */
+.Select-menu-outer {
+    z-index: 1001 !important;
+    position: absolute !important;
+}
+
+.VirtualizedSelectOption {
+    background-color: white;
+}
+
+.VirtualizedSelectFocusedOption {
+    background-color: var(--secondary-color) !important;
+    color: white;
+}
+
+/* Graph Container - Lower z-index */
+.graph-container {
+    background: white;
+    padding: 15px;
+    border-radius: 10px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    margin-bottom: 20px;
+    position: relative;
+    z-index: 1;
+}
+
+#last-updated {
+    font-size: 0.9rem;
+    color: #6c757d;
+    padding: 5px 10px;
+    background-color: rgba(248, 249, 250, 0.9);
+    border-radius: 5px;
+    display: inline-block;
+    margin: 10px 0;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+/* Loading State */
+._dash-loading {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    padding: 20px;
+    background: rgba(255, 255, 255, 0.9);
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    z-index: 1000;
+} 
