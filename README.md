@@ -2,6 +2,12 @@
 
 A comprehensive retail sales analytics platform built with Python and Dash. This dashboard provides real-time insights into sales performance, customer behavior, and product trends through interactive visualizations and data analysis tools.
 
+## 🌐 Live Demo
+
+**https://retail-sales-analysis-6ii2.onrender.com**
+
+> Hosted on Render's free tier, so the first request after a period of inactivity can take up to ~50 seconds to wake the instance. It is fast after that.
+
 ## 🚀 Features
 
 - 📊 **Interactive Visualizations**: Real-time charts and graphs for sales analysis
