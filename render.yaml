@@ -1,0 +1,10 @@
+# Render Blueprint - deploys the Dash app as a free web service.
+# On every push to main, Render rebuilds and redeploys automatically.
+services:
+  - type: web
+    name: retail-sales-analysis
+    runtime: python
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn src.app:server --bind 0.0.0.0:$PORT
+    autoDeploy: true

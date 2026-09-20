@@ -8,7 +8,7 @@ A comprehensive retail sales analytics platform built with Python and Dash. This
 - 🔍 **Advanced Filtering**: Filter data by date ranges, categories, and product types
 - 📈 **Performance Metrics**: Track key performance indicators (KPIs) and trends
 - 🎨 **Modern UI**: Clean, responsive interface built with Dash Bootstrap Components
-- 🔄 **Real-time Updates**: Live data updates from SQL Server database
+- 🔄 **Live Reload**: Data refreshes from a bundled sample dataset (CSV + Excel)
 - 🛡️ **Data Validation**: Robust error handling and data validation
 - 📱 **Responsive Design**: Works seamlessly on desktop and mobile devices
 
@@ -16,15 +16,13 @@ A comprehensive retail sales analytics platform built with Python and Dash. This
 
 Before you begin, ensure you have the following installed:
 - Python 3.8 or higher
-- SQL Server (for database)
-- ODBC Driver for SQL Server
 - Git (for version control)
 
 ## 📦 Installation
 
 1. **Clone the repository**:
 ```bash
-git clone https://github.com/yourusername/Retail_Sales_Analysis.git
+git clone https://github.com/laveshparyani/Retail_Sales_Analysis.git
 cd Retail_Sales_Analysis
 ```
 
@@ -44,39 +42,28 @@ source .venv/bin/activate
 pip install -r requirements.txt
 ```
 
-4. **Set up environment variables**:
-Create a `.env` file in the root directory with the following variables:
-```env
-DB_SERVER=your_server_name
-DB_NAME=your_database_name
-```
-
-5. **Test database connection**:
-```bash
-python src/test_db_connection.py
-```
-
-6. **Run the application**:
+4. **Run the application**:
 ```bash
 python src/app.py
 ```
 
-The dashboard will be available at `http://localhost:8050`
+The dashboard will be available at `http://localhost:8050`. No database setup is needed - the app reads the sample data in the `data/` folder.
 
 ## 🏗️ Project Structure
 
 ```
 Retail_Sales_Analysis/
-├── data/                  # Data files and resources
+├── data/                 # Sample dataset
+│   ├── customers.csv     # Reference customers
+│   ├── products.csv      # Reference products (category, price)
+│   └── sales_data.xlsx   # Sales records
 ├── src/
-│   ├── app.py            # Main application file
-│   ├── test_db_connection.py  # Database connection testing
-│   ├── static/           # Static assets (CSS, JS, images)
-│   └── __pycache__/      # Python bytecode cache
-├── .venv/                # Virtual environment
-├── .env                  # Environment variables
+│   ├── app.py            # Main Dash application
+│   └── static/css/       # Custom styles
+├── .github/              # Community health files + CI/CodeQL workflows
 ├── requirements.txt      # Python dependencies
-└── README.md            # Project documentation
+├── render.yaml           # Render deployment config
+└── README.md             # Project documentation
 ```
 
 ## 💻 Technology Stack
@@ -85,17 +72,15 @@ Retail_Sales_Analysis/
 - **Python**: Core programming language
 - **Dash**: Web framework for building analytical applications
 - **Pandas**: Data manipulation and analysis
-- **SQLAlchemy**: Database ORM and connection management
-- **PyODBC**: SQL Server connectivity
 
 ### Frontend
 - **Dash Bootstrap Components**: UI components and styling
 - **Plotly**: Interactive data visualization
 - **CSS**: Custom styling and responsive design
 
-### Database
-- **SQL Server**: Data storage and management
-- **OpenPyXL**: Excel file handling
+### Data
+- **CSV + Excel**: Bundled sample dataset in the `data/` folder
+- **Pandas + OpenPyXL**: Data loading and analysis
 
 ## 📚 How to Use
 
@@ -134,8 +119,15 @@ python src/app.py
 4. Push to the branch (`git push origin feature/AmazingFeature`)
 5. Open a Pull Request
 
+## 📄 License
+
+Licensed under the [MIT License](LICENSE).
+
+## 👤 Author
+
+**Lavesh Paryani** - [@laveshparyani](https://github.com/laveshparyani)
+
 ## 🙏 Acknowledgments
 
-- Dash community for the amazing framework
+- Dash community for the framework
 - Plotly for the visualization tools
-- SQLAlchemy team for the database ORM 

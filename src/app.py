@@ -5,15 +5,8 @@ import plotly.express as px
 import pandas as pd
 from datetime import datetime, timedelta
 import numpy as np
-from sqlalchemy import create_engine
-import urllib.parse
 import os
-from dotenv import load_dotenv
-import sqlite3
 import traceback
-
-# Load environment variables
-load_dotenv()
 
 # Initialize the Dash app with modern theme
 app = dash.Dash(
@@ -28,76 +21,51 @@ app = dash.Dash(
     ]
 )
 
+# Expose the underlying Flask server so gunicorn can serve it in production.
+server = app.server
+
 def connect_to_database():
-    """Connect to database and fetch data from SQL Server (customers, products) and Excel (sales)"""
+    """Load reference data (customers, products) from CSV and sales from Excel.
+
+    All three files live in the repo's data/ folder, so the dashboard runs the
+    same way locally and on the host, with no external database required.
+    """
     print("\n=== Data Collection Started ===")
-    
+
+    base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    data_dir = os.path.join(base_dir, 'data')
+
     try:
-        # 1. Get SQL Server data (customers and products only)
-        print("\n=== SQL Server Connection Attempt ===")
-        conn_str = (
-            'DRIVER={SQL Server};'
-            'SERVER=DESKTOP-GP07DFE;'
-            'DATABASE=RetailSalesDB;'
-            'Trusted_Connection=yes;'
+        # 1. Customers and products (reference data)
+        customers_df = pd.read_csv(os.path.join(data_dir, 'customers.csv'))
+        products_df = pd.read_csv(os.path.join(data_dir, 'products.csv'))
+        print(f"Loaded {len(customers_df)} customers and {len(products_df)} products")
+
+        # 2. Sales data from Excel
+        sales_df = pd.read_excel(os.path.join(data_dir, 'sales_data.xlsx'))
+        print(f"Found {len(sales_df)} sales records in Excel")
+        sales_df['Date'] = pd.to_datetime(sales_df['Date']).dt.date
+
+        # Keep only sales that reference known customers and products
+        valid_customer_ids = set(customers_df['CustomerID'].tolist())
+        valid_product_ids = set(products_df['ProductID'].tolist())
+        valid_sales = (
+            sales_df['CustomerID'].isin(valid_customer_ids) &
+            sales_df['ProductID'].isin(valid_product_ids)
         )
-        print(f"Connection string: {conn_str}")
-        
-        # Create engine
-        engine = create_engine(f"mssql+pyodbc:///?odbc_connect={urllib.parse.quote_plus(conn_str)}")
-        
-        with engine.connect() as conn:
-            print("\n=== Fetching Customer and Product Data ===")
-            
-            # Get customer data from SQL
-            customers_df = pd.read_sql_query("SELECT * FROM Customers", conn)
-            print(f"Found {len(customers_df)} customers")
-            print("Customer IDs:", customers_df['CustomerID'].tolist())
-            
-            # Get product data from SQL
-            products_df = pd.read_sql_query("SELECT * FROM Products", conn)
-            print(f"Found {len(products_df)} products")
-            print("Product IDs:", products_df['ProductID'].tolist())
-            
-        # 2. Get sales data from Excel
-        print("\n=== Reading Sales Data from Excel ===")
-        try:
-            sales_df = pd.read_excel('data/sales_data.xlsx')
-            print(f"Found {len(sales_df)} sales records in Excel")
-            
-            # Ensure date format consistency
-            sales_df['Date'] = pd.to_datetime(sales_df['Date']).dt.date
-            
-            # Validate sales data against customers and products
-            valid_customer_ids = set(customers_df['CustomerID'].tolist())
-            valid_product_ids = set(products_df['ProductID'].tolist())
-            
-            # Filter out invalid records
-            valid_sales = (
-                sales_df['CustomerID'].isin(valid_customer_ids) & 
-                sales_df['ProductID'].isin(valid_product_ids)
-            )
-            
-            invalid_count = len(sales_df) - valid_sales.sum()
-            if invalid_count > 0:
-                print(f"Warning: Found {invalid_count} sales records with invalid customer or product IDs")
-            
-            sales_df = sales_df[valid_sales].copy()
-            print(f"Using {len(sales_df)} valid sales records")
-            
-            # Sort by date
-            sales_df = sales_df.sort_values('Date')
-            
-        except Exception as e:
-            print(f"Error reading Excel data: {str(e)}")
-            print("Cannot proceed without sales data")
-            raise
-        
+
+        invalid_count = len(sales_df) - int(valid_sales.sum())
+        if invalid_count > 0:
+            print(f"Warning: {invalid_count} sales records reference unknown customers/products")
+
+        sales_df = sales_df[valid_sales].copy().sort_values('Date')
+        print(f"Using {len(sales_df)} valid sales records")
+
         print("\n=== Data Collection Completed ===")
         return customers_df, products_df, sales_df
-            
+
     except Exception as e:
-        print(f"\n=== Database Error ===")
+        print(f"\n=== Data Load Error ===")
         print(f"Error: {str(e)}")
         print("Stack trace:", traceback.format_exc())
         raise
