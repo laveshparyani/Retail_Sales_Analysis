@@ -1,11 +1,11 @@
-CustomerID,CustomerName,Region
-1,Alice Johnson,North
-2,Bob Smith,South
-3,Carol White,East
-4,David Brown,West
-5,Emma Davis,North
-6,Frank Miller,South
-7,Grace Lee,East
-8,Henry Wilson,West
-9,Ivy Chen,North
-10,Jack Taylor,South
+CustomerID,CustomerName,Location
+1,Alice Johnson,Mumbai
+2,Bob Smith,Delhi
+3,Carol White,Bangalore
+4,David Brown,Chennai
+5,Emma Davis,Mumbai
+6,Frank Miller,Delhi
+7,Grace Lee,Bangalore
+8,Henry Wilson,Chennai
+9,Ivy Chen,Mumbai
+10,Jack Taylor,Delhi
