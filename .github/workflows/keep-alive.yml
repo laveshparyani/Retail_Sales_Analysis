@@ -1,0 +1,36 @@
+name: Keep Alive
+
+# Pings the live Render app every ~10 minutes so the free instance stays warm
+# and visitors avoid the ~50 second cold start.
+#
+# Note on Render's free tier: it allows 750 instance-hours per month across ALL
+# your free services. Keeping one service awake 24/7 uses about 720 hours, which
+# fits within 750 - but do not keep several free services awake at once, or you
+# will exceed the monthly allowance. Remove this workflow to let it sleep again.
+
+on:
+  schedule:
+    - cron: '*/10 * * * *'   # every 10 minutes
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  ping:
+    name: Ping the app
+    runs-on: ubuntu-latest
+    steps:
+      - name: Wake the Render service
+        run: |
+          URL="https://retail-sales-analysis-6ii2.onrender.com/"
+          for i in 1 2 3; do
+            code=$(curl -s -o /dev/null -w "%{http_code}" --max-time 90 "$URL" || echo "000")
+            echo "Attempt $i: HTTP $code"
+            if [ "$code" = "200" ]; then
+              echo "App is awake."
+              exit 0
+            fi
+            sleep 20
+          done
+          echo "App did not return 200 yet (it may still be waking up)."
