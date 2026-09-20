@@ -1,10 +1,9 @@
 import dash
-from dash import html, dcc, Input, Output, State, callback
+from dash import html, dcc, Input, Output
 import dash_bootstrap_components as dbc
 import plotly.express as px
 import pandas as pd
-from datetime import datetime, timedelta
-import numpy as np
+from datetime import datetime
 import os
 import traceback
 
@@ -70,174 +69,6 @@ def connect_to_database():
         print("Stack trace:", traceback.format_exc())
         raise
 
-def create_visualizations(customers_df, products_df, sales_df):
-    """Create interactive visualizations"""
-    print("\n=== Creating Visualizations ===")
-    
-    # Merge data
-    print("Merging dataframes...")
-    print(f"Before merge - Sales: {len(sales_df)}, Customers: {len(customers_df)}, Products: {len(products_df)}")
-    
-    merged_data = pd.merge(sales_df, customers_df, on='CustomerID')
-    print(f"After first merge: {len(merged_data)} rows")
-    
-    merged_data = pd.merge(merged_data, products_df, on='ProductID')
-    print(f"After second merge: {len(merged_data)} rows")
-    
-    # Convert Date to datetime
-    merged_data['Date'] = pd.to_datetime(merged_data['Date'])
-    
-    # Calculate metrics
-    total_revenue = (merged_data['QuantitySold'] * merged_data['Price']).sum()
-    total_customers = merged_data['CustomerID'].nunique()
-    total_products = merged_data['ProductID'].nunique()
-    
-    print(f"\nCalculated Metrics:")
-    print(f"Total Revenue: ${total_revenue:,.2f}")
-    print(f"Unique Customers: {total_customers}")
-    print(f"Unique Products: {total_products}")
-    
-    # Create visualizations
-    print("\nGenerating plots...")
-    
-    # Sales Trends - Create complete date range and fill missing values
-    print("Creating sales trends visualization...")
-    
-    # Get unique dates and categories
-    all_dates = pd.date_range(
-        start=merged_data['Date'].min(),
-        end=merged_data['Date'].max(),
-        freq='D'
-    )
-    all_categories = merged_data['Category'].unique()
-    
-    # Create a complete date-category combination DataFrame
-    date_category_combos = pd.MultiIndex.from_product(
-        [all_dates, all_categories],
-        names=['Date', 'Category']
-    )
-    
-    # Create complete DataFrame with all possible combinations
-    trends_data = pd.DataFrame(index=date_category_combos).reset_index()
-    
-    # Merge with actual data
-    daily_sales = merged_data.groupby(['Date', 'Category']).agg({
-        'QuantitySold': 'sum',
-        'Price': lambda x: (x * merged_data.loc[x.index, 'QuantitySold']).sum()
-    }).reset_index()
-    
-    # Merge complete date range with actual data
-    trends_data = trends_data.merge(
-        daily_sales,
-        on=['Date', 'Category'],
-        how='left'
-    )
-    
-    # Fill missing values with 0
-    trends_data = trends_data.fillna(0)
-    
-    # Sort by date and category
-    trends_data = trends_data.sort_values(['Date', 'Category'])
-    
-    # Create the sales trends visualization
-    fig1 = px.line(
-        trends_data,
-        x='Date',
-        y='Price',
-        color='Category',
-        title='Sales Trends by Category',
-        template='plotly_white',
-        labels={
-            'Date': 'Date',
-            'Price': 'Revenue ($)',
-            'Category': 'Product Category'
-        }
-    )
-    
-    # Customize the layout
-    fig1.update_layout(
-        xaxis_title="Date",
-        yaxis_title="Revenue ($)",
-        legend_title="Product Category",
-        hovermode='x unified',
-        xaxis=dict(
-            tickformat='%Y-%m-%d',
-            tickmode='auto',
-            nticks=10,
-            showgrid=True
-        ),
-        yaxis=dict(
-            tickprefix='$',
-            tickformat=',.0f',
-            showgrid=True
-        ),
-        showlegend=True,
-        legend=dict(
-            yanchor="top",
-            y=0.99,
-            xanchor="left",
-            x=1.02
-        ),
-        margin=dict(r=150)  # Add right margin for legend
-    )
-    
-    # Update line styling
-    for trace in fig1.data:
-        trace.update(
-            mode='lines+markers',  # Add markers at data points
-            line=dict(width=2),    # Make lines thicker
-            marker=dict(size=6)    # Set marker size
-        )
-    
-    # Update hover template
-    fig1.update_traces(
-        hovertemplate="<br>".join([
-            "<b>%{fullData.name}</b>",
-            "Date: %{x|%Y-%m-%d}",
-            "Revenue: $%{y:,.2f}",
-            "<extra></extra>"
-        ])
-    )
-    
-    # Top Locations
-    location_data = merged_data.groupby('Location')['QuantitySold'].sum().reset_index().nlargest(5, 'QuantitySold')
-    print(f"Location data points: {len(location_data)}")
-    fig2 = px.bar(
-        location_data,
-        x='Location',
-        y='QuantitySold',
-        title='Top 5 Locations by Sales',
-        template='plotly_white'
-    )
-    
-    # Category Distribution
-    category_data = merged_data.groupby('Category')['QuantitySold'].sum().reset_index()
-    print(f"Category data points: {len(category_data)}")
-    fig3 = px.pie(
-        category_data,
-        values='QuantitySold',
-        names='Category',
-        title='Sales Distribution by Category',
-        template='plotly_white'
-    )
-    
-    # Customer Patterns
-    pattern_data = merged_data.groupby('CustomerID').agg({
-        'QuantitySold': 'sum',
-        'Price': 'mean'
-    }).reset_index()
-    print(f"Pattern data points: {len(pattern_data)}")
-    fig4 = px.scatter(
-        pattern_data,
-        x='QuantitySold',
-        y='Price',
-        title='Customer Purchase Patterns',
-        template='plotly_white'
-    )
-    
-    print("=== Visualization Creation Complete ===\n")
-    return fig1, fig2, fig3, fig4, total_revenue, total_customers, total_products
-
 # Create the layout
 app.layout = dbc.Container([
     # Header
@@ -248,10 +79,10 @@ app.layout = dbc.Container([
         ], width=12)
     ]),
     
-    # Auto-refresh interval - checks every 5 seconds
+    # Auto-refresh interval - refreshes the dashboard every 5 minutes
     dcc.Interval(
         id='interval-component',
-        interval=5*1000,  # in milliseconds
+        interval=5*60*1000,  # 5 minutes, in milliseconds
         n_intervals=0
     ),
     
